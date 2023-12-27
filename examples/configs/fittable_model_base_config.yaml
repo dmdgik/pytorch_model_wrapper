@@ -1,0 +1,72 @@
+init:
+    experiment_name: 
+    accelerator:
+        mixed_precision: "no"
+        gradient_accumulation_steps: 1
+        step_scheduler_with_optimizer: false
+        cpu: true
+    logging_file:
+    log_only_main_process: true
+common:
+    from_checkpoint:
+    check_run_num:
+dataloader:
+    batch_size: 1
+    shuffle: true
+    pin_memory: false
+optimizer:
+    optimizer_name: "Adam"
+    optimizer_params:
+        lr: 0.001
+scheduler:
+    scheduler_name:
+    scheduler_params: {}
+monitor:
+    monitor_enabled: false
+    monitor_dir: "./"
+checkpoint:
+    saving_checkpoint_enabled: false
+    save_checkpoint_every: 1
+    save_torchscripted: false
+    checkpoint_dir: "./"
+    saving_without_optimizer_and_scheduler: false
+    train_history_dir: "./"
+snapshot:
+    saving_snapshot_enabled: false
+    save_snapshot_every: 1
+    snapshot_dir: "./"
+mlflow:
+    saving_mlflow_checkpoint_enabled: false
+    save_mlflow_checkpoint_every: 1
+    save_mlflow_torchscripted: false
+    mlflow_tracking_server_uri:
+    mlflow_experiment_name:
+    mlflow_tags: {}
+    mlflow_params: {}
+fit:
+    fit_name:
+    epochs: 1
+    freezed_params_names: []
+    clip_grad_value_:
+    clip_grad_norm_:
+    metrics: []
+    overfitting_detector_enabled: false
+    overfitting_detector_metric:
+    overfitting_detector_epochs: 1
+evaluate:
+    save_evaluate_results: false
+    evaluate_results_file: "./evaluate_results.yaml"
+    metrics: []
+predict:
+    predict_results_file: "./predict_results.pt"
+s3_uploading:
+    bucket_name:
+    folder_name: ""
+    save_model: false
+    save_model_torchscripted: false
+    save_fit_results: false
+    save_logs: false
+    save_monitor_logs: false
+    save_evaluate_results: false
+    save_predict_results: false
+extra: {}

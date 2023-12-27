@@ -1,0 +1,10 @@
+tqdm
+torch
+accelerate
+mlflow
+loguru
+pyyaml
+boto3
+tensorboard
+
+-e .

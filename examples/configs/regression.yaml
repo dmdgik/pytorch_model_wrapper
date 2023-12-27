@@ -1,0 +1,115 @@
+init:
+    experiment_name: "regression_model"
+    accelerator:
+        mixed_precision: "no"
+        gradient_accumulation_steps: 1
+        step_scheduler_with_optimizer: false
+        cpu: true
+    logging_file: "../results/regression/logs.log"
+    log_only_main_process: true
+common:
+    from_checkpoint:
+    check_run_num: 
+dataloader:
+    batch_size: 10
+    shuffle: true
+    pin_memory: false
+optimizer:
+    optimizer_name: "Adam"
+    optimizer_params:
+        lr: 0.001
+scheduler:
+    scheduler_name:
+    scheduler_params: {}
+monitor:
+    monitor_enabled: true
+    monitor_dir: "../results/regression/tensorboard_logs/"
+checkpoint:
+    saving_checkpoint_enabled: true
+    save_checkpoint_every: 1
+    save_torchscripted: true
+    checkpoint_dir: "../results/regression/models/"
+    saving_without_optimizer_and_scheduler: false
+    train_history_dir: "../results/regression/results/"
+snapshot:
+    saving_snapshot_enabled: true
+    save_snapshot_every: 1
+    snapshot_dir: "../results/regression/snapshots/"
+mlflow:
+    saving_mlflow_checkpoint_enabled: false
+    save_mlflow_checkpoint_every: 1
+    save_mlflow_torchscripted: false
+    mlflow_tracking_server_uri:
+    mlflow_experiment_name:
+    mlflow_tags: {}
+    mlflow_params: {}
+fit:
+    fit_name: "first_fit"
+    epochs: 10
+    freezed_params_names: ["linear1.weight", "linear1.bias"]
+    clip_grad_value_: 1.0
+    clip_grad_norm_: 3.0
+    metrics: ["RMSE"]
+    overfitting_detector_enabled: true
+    overfitting_detector_metric: "RMSE"
+    overfitting_detector_epochs: 2
+evaluate:
+    save_evaluate_results: true
+    evaluate_results_file: "../results/regression/test_evaluate_results.yaml"
+    metrics: ["RMSE"]
+predict:
+    predict_results_file: "../results/regression/test_predict_results.pt"
+s3_uploading:
+    bucket_name:
+    folder_name: ""
+    save_model: false
+    save_model_torchscripted: false
+    save_fit_results: false
+    save_logs: false
+    save_monitor_logs: false
+    save_evaluate_results: false
+    save_predict_results: false
+extra:
+    dataset:
+        dataset_class: "RegressionDataset"
+        datasets:
+          - data_file: "../data/data_regression_train.csv"
+          - data_file: "../data/data_regression_valid.csv"
+          - data_file: "../data/data_regression_test.csv"
+    
+    model:
+        model_class: "RegressionModel"
+        model_params:
+            input_dim: 10
+            hidden_dim_1: 20
+            hidden_dim_2: 20
+    
+    criterion: "MSELoss"
+
+    additional_wrapper_config_changes:
+      - change_step_name: "additional_fit"
+        change_config:
+            fit:
+                fit_name: "second_fit"
+                epochs: 5
+                freezed_params_names: []
+                clip_grad_value_: 
+                clip_grad_norm_:
+                metrics: ["RMSE"]
+                overfitting_detector_enabled: false
+                overfitting_detector_metric: 
+                overfitting_detector_epochs: 1
+            evaluate:
+                save_evaluate_results: true
+                evaluate_results_file: "../results/regression/test_evaluate_results_new.yaml"
+                metrics: ["RMSE"]
+      - change_step_name: "new_predicition"
+        change_config:
+            dataloader:
+                batch_size: 50
+                shuffle: false
+                pin_memory: false
+            predict:
+                predict_results_file: "../results/regression/test_predict_results_new.pt"
+            
+          
