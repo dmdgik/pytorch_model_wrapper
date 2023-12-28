@@ -704,8 +704,6 @@ class FittableModelWrapper:
         self.logger.log("INFO", self.stage, self.device)
         try:
             self._process_common_config()
-            self._process_optimizer_config()
-            self._process_scheduler_config()
             self._process_checkpoint_config()
             self._process_snapshot_config()
             self._process_mlflow_config()
@@ -718,6 +716,8 @@ class FittableModelWrapper:
                 p.requires_grad = True
                 if p_name in self.freezed_params_names:
                     p.requires_grad = False
+            self._process_optimizer_config()
+            self._process_scheduler_config()
             self.model_parametrs_count = sum(p.numel() for p in self.model.parameters())
             self.model_fittable_parametrs_count = sum(
                 p.numel() for p in self.model.parameters() if p.requires_grad
