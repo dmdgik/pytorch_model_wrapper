@@ -427,7 +427,7 @@ class FittableModelWrapper:
             eval_metrics = self._eval_epoch_process(dataloader_with_bar)
             self.logger.log("INFO", "EVALUATE RESULTS", eval_metrics, self.device)
             self.accelerator.wait_for_everyone()
-            if self.accelerator.is_main_process and self.save_evaluate_results:
+            if self.save_evaluate_results:
                 self._save_evaluate_results(eval_metrics)
         except Exception as e:
             self.stage = self.stages.EVALUATING_ERROR
@@ -845,6 +845,7 @@ class FittableModelWrapper:
         self.model.cpu()
 
     def _save_fit_epoch_results(self) -> None:
+        self.accelerator.wait_for_everyone()
         if self.accelerator.is_main_process:
             results = self.history.get_fit_results_by_id(self.fit_name)
             results_file_name = (
@@ -853,8 +854,10 @@ class FittableModelWrapper:
             results_path = os.path.join(self.train_history_dir, results_file_name)
             with open(results_path, "w") as outfile:
                 yaml.dump(results, outfile, default_flow_style=False)
+        self.accelerator.wait_for_everyone()
 
     def _save_checkpoint(self, torchscripted: bool = False, mlflow: bool = False) -> None:
+        self.accelerator.wait_for_everyone()
         if self.accelerator.is_main_process:
             self.model.eval()
             self.model.cpu()
@@ -886,6 +889,7 @@ class FittableModelWrapper:
                     self.checkpoint_dir, scripted_model_checkpoint_name
                 )
                 torch.jit.save(scripted_model, scripted_file_full_path)
+        self.accelerator.wait_for_everyone()
 
     def _load_checkpoint(self, checkpoint_path: str, only_model: bool = False) -> None:
         self.accelerator.wait_for_everyone()
@@ -903,6 +907,7 @@ class FittableModelWrapper:
         self.accelerator.wait_for_everyone()
 
     def _save_mlflow_checkpoint(self, best: bool = False) -> None:
+        self.accelerator.wait_for_everyone()
         if self.accelerator.is_main_process:
             postfix = "" if best else "_mlflow"
             model_checkpoint_name = (
@@ -1053,8 +1058,10 @@ class FittableModelWrapper:
                     "valid_results"
                 ].items():
                     mlflow.log_metric(f"valid_{metric_name}", metric_value)
+        self.accelerator.wait_for_everyone()
 
     def _save_snapshot(self) -> None:
+        self.accelerator.wait_for_everyone()
         if self.accelerator.is_main_process:
             self.model.eval()
             self.model.cpu()
@@ -1078,8 +1085,10 @@ class FittableModelWrapper:
                 },
                 file_full_path,
             )
+        self.accelerator.wait_for_everyone()
 
     def _load_snapshot(self) -> None:
+        self.accelerator.wait_for_everyone()
         file_full_path = os.path.join(self.snapshot_dir, f"snapshot_{self.fit_name}.pt")
         if os.path.isfile(file_full_path):
             snapshot = torch.load(file_full_path)
@@ -1104,8 +1113,11 @@ class FittableModelWrapper:
             self.accelerator.wait_for_everyone()
 
     def _save_evaluate_results(self, results: dict) -> None:
-        with open(self.evaluate_results_file, "w") as outfile:
-            yaml.dump(results, outfile, default_flow_style=False)
+        self.accelerator.wait_for_everyone()
+        if self.accelerator.is_main_process:
+            with open(self.evaluate_results_file, "w") as outfile:
+                yaml.dump(results, outfile, default_flow_style=False)
+        self.accelerator.wait_for_everyone()
 
     def _overfitting_detector_compute(self) -> None:
         current_epoch = self.running_epoch
